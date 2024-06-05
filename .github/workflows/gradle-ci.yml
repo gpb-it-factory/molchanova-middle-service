@@ -7,10 +7,6 @@ on:
     branches: [ "trunk" ]
     types: [opened, reopened, synchronize]
 
-env:
-  TG_NAME_GPB: ${{ vars.TG_NAME }}
-  TG_TOKEN_GPB: ${{ secrets.TG_TOKEN }}
-
 jobs:
   build:
     runs-on: ubuntu-latest
