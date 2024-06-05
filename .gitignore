@@ -1,0 +1,22 @@
+# Папка сборки и временные файлы
+build/
+.gradle/
+out/
+target/
+diagramsUML/
+logs/
+
+# Файлы и папки настроек IntelliJ IDEA
+.idea/
+*.iml
+*.ipr
+*.iws
+*.jar
+*.war
+*.ear
+
+!gradle-wrapper.jar
+
+# Логи и отчёты
+*.log
+*.jks
