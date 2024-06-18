@@ -1,3 +1,17 @@
 spring:
   application:
     name: molchanova-middle-service
+
+server:
+  port: 8084
+
+client:
+  api:
+    users:
+      rest: false
+      mock: true
+  urls:
+    host: http://localhost:8087/v2
+    endpoints:
+      users:
+        create: /users
