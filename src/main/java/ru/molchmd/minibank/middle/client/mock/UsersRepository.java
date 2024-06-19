@@ -10,28 +10,28 @@ import java.util.concurrent.ConcurrentHashMap;
 @Component
 @ConditionalOnProperty(value = "client.api.users.mock")
 public class UsersRepository {
-    private final Map<Long, UUID> usersRepository_Id_UUID = new ConcurrentHashMap<>();
-    private final Map<String, UUID> usersRepository_Name_UUID = new ConcurrentHashMap<>();
+    private final Map<Long, UUID> usersRepositoryIdUUID = new ConcurrentHashMap<>();
+    private final Map<String, UUID> usersRepositoryNameUUID = new ConcurrentHashMap<>();
 
     public void addUser(Long telegramUserId, String userName) {
         UUID userId = UUID.randomUUID();
-        usersRepository_Id_UUID.put(telegramUserId, userId);
-        usersRepository_Name_UUID.put(userName, userId);
+        usersRepositoryIdUUID.put(telegramUserId, userId);
+        usersRepositoryNameUUID.put(userName, userId);
     }
 
     public boolean isUserExist(Long telegramUserId) {
-        return usersRepository_Id_UUID.containsKey(telegramUserId);
+        return usersRepositoryIdUUID.containsKey(telegramUserId);
     }
 
     public boolean isUserExist(String userName) {
-        return usersRepository_Name_UUID.containsKey(userName);
+        return usersRepositoryNameUUID.containsKey(userName);
     }
 
     public UUID getUserId(Long telegramUserId) {
-        return usersRepository_Id_UUID.get(telegramUserId);
+        return usersRepositoryIdUUID.get(telegramUserId);
     }
 
     public UUID getUserId(String userName) {
-        return usersRepository_Name_UUID.get(userName);
+        return usersRepositoryNameUUID.get(userName);
     }
 }
