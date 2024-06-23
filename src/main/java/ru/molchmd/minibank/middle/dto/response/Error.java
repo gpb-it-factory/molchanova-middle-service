@@ -1,16 +1,18 @@
 package ru.molchmd.minibank.middle.dto.response;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 public class Error {
     private final String message;
     private final String type;
     private final String code;
-    private final String traceId;
 
-    public Error(String message, String type, String code, String traceId) {
+    public Error(@JsonProperty("message") String message,
+                 @JsonProperty("type") String type,
+                 @JsonProperty("code") String code) {
         this.message = message;
         this.type = type;
         this.code = code;
-        this.traceId = traceId;
     }
 
     public String getMessage() {
@@ -23,9 +25,5 @@ public class Error {
 
     public String getCode() {
         return code;
-    }
-
-    public String getTraceId() {
-        return traceId;
     }
 }
