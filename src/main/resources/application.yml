@@ -7,14 +7,15 @@ server:
 
 client:
   api:
-    users:
-      rest: false
-      mock: true
+    rest: false
+    mock: true
   urls:
     host: http://localhost:8087/v2
     endpoints:
       users:
         create: /users
+      accounts:
+        create: /users/{id}/accounts
 
 backend:
   accounts:

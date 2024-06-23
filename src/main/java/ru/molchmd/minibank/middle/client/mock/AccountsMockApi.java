@@ -17,7 +17,7 @@ import java.math.BigDecimal;
 import java.util.UUID;
 
 @Component
-@ConditionalOnProperty(value = "client.api.users.mock")
+@ConditionalOnProperty(value = "client.api.mock")
 public class AccountsMockApi implements AccountsApi {
     private final TelegramUserIdUuidRepository telegramUserIdUuidRepository;
     private final UsersAccountsRepository usersAccountsRepository;

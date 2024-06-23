@@ -8,7 +8,7 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Component
-@ConditionalOnProperty(value = "client.api.users.mock")
+@ConditionalOnProperty(value = "client.api.mock")
 public class UsersAccountsRepository {
     private final Map<UUID, AccountsUuidRepository> repository = new ConcurrentHashMap<>();
 

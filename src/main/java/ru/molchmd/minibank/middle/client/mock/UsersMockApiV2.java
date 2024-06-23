@@ -14,7 +14,7 @@ import ru.molchmd.minibank.middle.client.mock.util.ErrorResponseEntity;
 import java.util.UUID;
 
 @Component
-@ConditionalOnProperty(value = "client.api.users.mock")
+@ConditionalOnProperty(value = "client.api.mock")
 public class UsersMockApiV2 implements UsersApi {
     private final TelegramUserIdUuidRepository telegramUserIdUUIDRepository;
     private final TelegramUserNameUuidRepository telegramUserNameUUIDRepository;

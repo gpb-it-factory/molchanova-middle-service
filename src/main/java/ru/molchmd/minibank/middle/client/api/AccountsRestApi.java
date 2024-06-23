@@ -5,27 +5,28 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
-import ru.molchmd.minibank.middle.client.UsersApi;
-import ru.molchmd.minibank.middle.dto.request.CreateUserRequest;
+import ru.molchmd.minibank.middle.client.AccountsApi;
+import ru.molchmd.minibank.middle.dto.request.CreateAccountRequest;
 
 @Component
 @ConditionalOnProperty(value = "client.api.rest")
-public class UsersRestApi implements UsersApi {
+public class AccountsRestApi implements AccountsApi {
     private final RestTemplate rest;
     private final String createEndpoint;
 
-    public UsersRestApi(@Value("${client.urls.endpoints.users.create}") String createEndpoint,
-                        RestTemplate rest) {
-        this.createEndpoint = createEndpoint;
+    public AccountsRestApi(RestTemplate rest,
+                           @Value("${client.urls.endpoints.accounts.create}") String createEndpoint) {
         this.rest = rest;
+        this.createEndpoint = createEndpoint;
     }
 
     @Override
-    public ResponseEntity<String> createUser(CreateUserRequest createUserRequest) {
+    public ResponseEntity<String> createAccount(Long userId, CreateAccountRequest createAccountRequest) {
         ResponseEntity<String> response = rest.postForEntity(
                 createEndpoint,
-                createUserRequest,
-                String.class
+                createAccountRequest,
+                String.class,
+                userId
         );
         return response;
     }
