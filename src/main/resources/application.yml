@@ -15,3 +15,8 @@ client:
     endpoints:
       users:
         create: /users
+
+backend:
+  accounts:
+    amount:
+      start: 5000.00
