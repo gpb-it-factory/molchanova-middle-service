@@ -14,19 +14,19 @@ import ru.molchmd.minibank.middle.exception.entity.UserAlreadyExistsException;
 public class UsersControllerException {
     @ExceptionHandler(UserAlreadyExistsException.class)
     public ResponseEntity<Void> handleUserAlreadyExistsException(UserAlreadyExistsException exception) {
-        log.error("User already exists error");
+        log.error("Response -> User id[{}] already exists error | status {}", exception.userId, HttpStatus.CONFLICT);
         return new ResponseEntity<>(HttpStatus.CONFLICT);
     }
 
     @ExceptionHandler(ResourceAccessException.class)
     public ResponseEntity<Void> handleResourceAccessException(ResourceAccessException exception) {
-        log.error("Server is not available error");
+        log.error("Response -> Server is not available error | status" + HttpStatus.SERVICE_UNAVAILABLE);
         return new ResponseEntity<>(HttpStatus.SERVICE_UNAVAILABLE);
     }
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Void> handleException(Exception exception) {
-        log.error("Undefined error");
-        return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        log.error("Response -> Undefined error | status " + HttpStatus.INTERNAL_SERVER_ERROR);
+        return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
     }
 }

@@ -4,17 +4,18 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
-import ru.molchmd.minibank.middle.client.mock.UsersMockApi;
-import ru.molchmd.minibank.middle.client.mock.UsersRepository;
+import ru.molchmd.minibank.middle.client.mock.UsersMockApiV2;
+import ru.molchmd.minibank.middle.client.mock.repository.TelegramUserIdUuidRepository;
+import ru.molchmd.minibank.middle.client.mock.repository.TelegramUserNameUuidRepository;
 import ru.molchmd.minibank.middle.dto.request.CreateUserRequest;
 import ru.molchmd.minibank.middle.exception.entity.UserAlreadyExistsException;
-import ru.molchmd.minibank.middle.service.UsersService;
+import ru.molchmd.minibank.middle.service.CreateUserService;
 
 @DisplayName("Проверка контроллера /users")
 public class UsersControllerTest {
     private final UsersController usersController = new UsersController(
-            new UsersService(
-                    new UsersMockApi(new UsersRepository())
+            new CreateUserService(
+                    new UsersMockApiV2(new TelegramUserIdUuidRepository(), new TelegramUserNameUuidRepository())
             )
     );
 
@@ -30,8 +31,9 @@ public class UsersControllerTest {
 
     @DisplayName("Проверка ответа на уже зарегистрированного пользователя")
     @Test
-    void createConflictUserTest() {
+    void createExistUserTest() {
         CreateUserRequest createUserRequest = new CreateUserRequest(88005553535L, "tester");
+
         usersController.createUser(createUserRequest);
 
         Assertions.assertThrows(UserAlreadyExistsException.class,

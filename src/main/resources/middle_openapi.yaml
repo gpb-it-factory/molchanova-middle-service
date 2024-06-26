@@ -1,0 +1,195 @@
+openapi: 3.0.2
+servers:
+  - url: https://localhost:8084/api/v1
+info:
+  title: GPB IT Factory Mini-Bank (middle)
+  version: 1.0.0
+
+paths:
+  /users:
+    post:
+      operationId: createUser
+      summary: Создать нового пользователя
+      tags: [users]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateUserRequest'
+      responses:
+        '204':
+          description: Пользователь создан
+        '409':
+          description: Пользователь уже зарегистрирован
+        '500':
+          description: На сервере произошла ошибка
+        '503':
+          description: Сервер не доступен (backend)
+
+  /users/{id}/accounts:
+    post:
+      operationId: createUserAccount
+      summary: Открыть новый счёт для пользователя
+      tags: [accounts]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+            format: int64
+            example: 356789
+          description: Идентификатор пользователя в Telegram
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateAccountRequest'
+      responses:
+        '204':
+          description: Счёт создан
+        '400':
+          description: Пользователь не зарегистрирован
+        '409':
+          description: Такой счет у данного пользователя уже есть
+        '500':
+          description: На сервере произошла ошибка
+        '503':
+          description: Сервер не доступен (backend)
+    get:
+      operationId: getUserAccounts
+      summary: Получить счета пользователя
+      tags: [accounts]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+            format: int64
+            example: 356789
+          description: Идентификатор пользователя в Telegram
+      responses:
+        '200':
+          description: Список счетов пользователя
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccountsListResponse'
+        '400':
+          description: Пользователь не зарегистрирован
+        '500':
+          description: На сервере произошла ошибка
+        '503':
+          description: Сервер не доступен (backend)
+          
+  /transfers:
+    post:
+      operationId: createTransfer
+      summary: Создать перевод со счёта пользователя на счёт другого пользователя
+      tags: [transfers]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateTransferRequest'
+      responses:
+        '200':
+          description: Перевод совершён
+        '400':
+          description: Пользователь/счет отправляющий/принимающий не зарегистрирован
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: На сервере произошла ошибка
+        '503':
+          description: Сервер не доступен (backend)
+
+components:
+  schemas:
+    CreateUserRequest:
+      type: object
+      description: Запрос на создание нового пользователя
+      properties:
+        userId:
+          description: Идентификатор пользователя в Telegram
+          type: integer
+          format: int64
+          example: 348741706
+        userName:
+          description: Username пользователя в Telegram
+          type: string
+          example: vrvaganov
+      required:
+        - userId
+        - userName
+    CreateAccountRequest:
+      type: object
+      description: Запрос на создание нового счёта
+      properties:
+        accountName:
+          type: string
+          example: 'Акционный'
+      required:
+        - accountName
+    CreateTransferRequest:
+      type: object
+      description: Запрос на перевод со счёта пользователя на другой
+      properties:
+        from:
+          type: string
+          example: vrvaganov
+        to:
+          type: string
+          example: paveldurov
+        amount:
+          type: string
+          format: number
+          example: '5000.20'
+      required:
+        - from
+        - to
+        - amount
+    AccountsListResponse:
+      type: array
+      description: Список счетов пользователя
+      items:
+        type: object
+        properties:
+          accountName:
+            type: string
+            example: 'Акционный'
+          amount:
+            type: string
+            format: number
+            example: '5000.20'
+        required:
+          - accountName
+          - amount
+    Error:
+      type: object
+      description: Формат ошибки
+      properties:
+        message:
+          type: string
+          example: Произошла неизвестная ошибка
+        type:
+          type: string
+          example: SOMETHING_ERROR
+        code:
+          type: string
+          example: '123'
+      required:
+        - message
+        - type
+        - code
+tags:
+  - name: users
+    description: Операции с пользователями
+  - name: accounts
+    description: Операции со счетами пользователей

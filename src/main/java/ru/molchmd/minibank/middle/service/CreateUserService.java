@@ -8,16 +8,16 @@ import ru.molchmd.minibank.middle.dto.request.CreateUserRequest;
 import ru.molchmd.minibank.middle.exception.entity.UserAlreadyExistsException;
 
 @Service
-public class UsersService {
+public class CreateUserService {
     private final UsersApi usersApi;
 
-    public UsersService(UsersApi usersApi) {
+    public CreateUserService(UsersApi usersApi) {
         this.usersApi = usersApi;
     }
 
     public void createUser(CreateUserRequest createUserRequest) {
         ResponseEntity<String> response = usersApi.createUser(createUserRequest);
         if (response.getStatusCode().isSameCodeAs(HttpStatus.CONFLICT))
-            throw new UserAlreadyExistsException();
+            throw new UserAlreadyExistsException(createUserRequest.getUserId());
     }
 }
