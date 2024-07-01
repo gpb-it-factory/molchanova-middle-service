@@ -175,19 +175,11 @@ components:
       type: object
       description: Формат ошибки
       properties:
-        message:
-          type: string
-          example: Произошла неизвестная ошибка
         type:
           type: string
           example: SOMETHING_ERROR
-        code:
-          type: string
-          example: '123'
       required:
-        - message
         - type
-        - code
 tags:
   - name: users
     description: Операции с пользователями

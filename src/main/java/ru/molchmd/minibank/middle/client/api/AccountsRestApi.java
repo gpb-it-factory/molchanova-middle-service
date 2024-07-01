@@ -30,4 +30,14 @@ public class AccountsRestApi implements AccountsApi {
         );
         return response;
     }
+
+    @Override
+    public ResponseEntity<String> getUserAccounts(Long userId) {
+        ResponseEntity<String> response = rest.getForEntity(
+                createEndpoint,
+                String.class,
+                userId
+        );
+        return response;
+    }
 }
