@@ -16,8 +16,14 @@ client:
         create: /users
       accounts:
         create: /users/{id}/accounts
+      transfers:
+        create: /transfers
 
 backend:
   accounts:
     amount:
       start: 5000.00
+  transfers:
+    amount:
+      max: 100000.00
+      min: 0.00
