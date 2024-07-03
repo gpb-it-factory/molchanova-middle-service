@@ -1,42 +1,77 @@
 package ru.molchmd.minibank.middle.controller;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.http.HttpStatus;
-import ru.molchmd.minibank.middle.client.mock.UsersMockApiV2;
-import ru.molchmd.minibank.middle.client.mock.repository.TelegramUserIdUuidRepository;
-import ru.molchmd.minibank.middle.client.mock.repository.TelegramUserNameUuidRepository;
+import org.mockito.Mockito;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.MediaType;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.web.client.ResourceAccessException;
 import ru.molchmd.minibank.middle.dto.request.CreateUserRequest;
 import ru.molchmd.minibank.middle.exception.entity.UserAlreadyExistsException;
 import ru.molchmd.minibank.middle.service.CreateUserService;
 
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
 @DisplayName("Проверка контроллера /users")
+@WebMvcTest(UsersController.class)
 public class UsersControllerTest {
-    private final UsersController usersController = new UsersController(
-            new CreateUserService(
-                    new UsersMockApiV2(new TelegramUserIdUuidRepository(), new TelegramUserNameUuidRepository())
-            )
-    );
+    @Autowired
+    private MockMvc mockMvc;
+    @MockBean
+    private CreateUserService createUserService;
+    @Autowired
+    private UsersController usersController;
+    private final String url = "/api/v1/users";
 
-    @DisplayName("Проверка ответа на создание пользователя")
+    @DisplayName("Пользователь создан успешно")
     @Test
-    void createUserTest() {
-        CreateUserRequest createUserRequest = new CreateUserRequest(88005553535L, "tester");
+    void createUserSuccess() throws Exception {
+        Mockito.doNothing().when(createUserService).createUser(Mockito.any(CreateUserRequest.class));
+        String jsonRequest = "{\"userId\": \"8800553535\",\n\"userName\": \"tester\"}";
 
-        var response = usersController.createUser(createUserRequest);
-
-        Assertions.assertTrue(response.getStatusCode().isSameCodeAs(HttpStatus.CREATED));
+        mockMvc.perform(post(url)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(jsonRequest))
+                .andExpect(status().isCreated());
     }
 
-    @DisplayName("Проверка ответа на уже зарегистрированного пользователя")
+    @DisplayName("Пользователь уже существует")
     @Test
-    void createExistUserTest() {
-        CreateUserRequest createUserRequest = new CreateUserRequest(88005553535L, "tester");
+    void createUserConflict() throws Exception {
+        Mockito.doThrow(UserAlreadyExistsException.class).when(createUserService).createUser(Mockito.any(CreateUserRequest.class));
+        String jsonRequest = "{\"userId\": \"8800553535\",\n\"userName\": \"tester\"}";
 
-        usersController.createUser(createUserRequest);
+        mockMvc.perform(post(url)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(jsonRequest))
+                .andExpect(status().isConflict());
+    }
 
-        Assertions.assertThrows(UserAlreadyExistsException.class,
-                () -> usersController.createUser(createUserRequest));
+    @DisplayName("Сервер backend не доступен")
+    @Test
+    void createUserServerNotAvailable() throws Exception {
+        Mockito.doThrow(ResourceAccessException.class).when(createUserService).createUser(Mockito.any(CreateUserRequest.class));
+        String jsonRequest = "{\"userId\": \"8800553535\",\n\"userName\": \"tester\"}";
+
+        mockMvc.perform(post(url)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(jsonRequest))
+                .andExpect(status().isServiceUnavailable());
+    }
+
+    @DisplayName("Ошибка сервера backend")
+    @Test
+    void createUserUndefinedError() throws Exception {
+        Mockito.doThrow(RuntimeException.class).when(createUserService).createUser(Mockito.any(CreateUserRequest.class));
+        String jsonRequest = "{\"userId\": \"8800553535\",\n\"userName\": \"tester\"}";
+
+        mockMvc.perform(post(url)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(jsonRequest))
+                .andExpect(status().isInternalServerError());
     }
 }

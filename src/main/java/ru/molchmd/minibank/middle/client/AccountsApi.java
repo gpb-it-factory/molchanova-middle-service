@@ -5,4 +5,5 @@ import ru.molchmd.minibank.middle.dto.request.CreateAccountRequest;
 
 public interface AccountsApi {
     ResponseEntity<String> createAccount(Long userId, CreateAccountRequest createAccountRequest);
+    ResponseEntity<String> getUserAccounts(Long userId);
 }

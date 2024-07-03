@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.client.ResourceAccessException;
 import ru.molchmd.minibank.middle.controller.AccountsController;
 import ru.molchmd.minibank.middle.exception.entity.AccountAlreadyExistException;
+import ru.molchmd.minibank.middle.exception.entity.InternalServerException;
 import ru.molchmd.minibank.middle.exception.entity.UserIsNotExistException;
 
 @ControllerAdvice(assignableTypes = {AccountsController.class})
@@ -30,6 +31,12 @@ public class AccountsControllerException {
     public ResponseEntity<Void> handleResourceAccessException(ResourceAccessException exception) {
         log.error("Response -> Server is not available error | status " + HttpStatus.SERVICE_UNAVAILABLE);
         return new ResponseEntity<>(HttpStatus.SERVICE_UNAVAILABLE);
+    }
+
+    @ExceptionHandler(InternalServerException.class)
+    public ResponseEntity<Void> handleInternalServerException(InternalServerException exception) {
+        log.error("Response -> Server error | status " + HttpStatus.INTERNAL_SERVER_ERROR);
+        return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
     @ExceptionHandler(Exception.class)
