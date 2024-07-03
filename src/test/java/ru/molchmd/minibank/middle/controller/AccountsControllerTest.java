@@ -1,5 +1,6 @@
 package ru.molchmd.minibank.middle.controller;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -14,6 +15,7 @@ import ru.molchmd.minibank.middle.dto.response.AccountFrontendResponse;
 import ru.molchmd.minibank.middle.exception.entity.AccountAlreadyExistException;
 import ru.molchmd.minibank.middle.exception.entity.InternalServerException;
 import ru.molchmd.minibank.middle.exception.entity.UserIsNotExistException;
+import ru.molchmd.minibank.middle.metrics.endpoint.AccountsMetrics;
 import ru.molchmd.minibank.middle.service.CreateAccountService;
 import ru.molchmd.minibank.middle.service.GetAccountsService;
 
@@ -33,9 +35,19 @@ public class AccountsControllerTest {
     private CreateAccountService createAccountService;
     @MockBean
     private GetAccountsService getAccountsService;
+    @MockBean
+    private AccountsMetrics metric;
     @Autowired
     private AccountsController accountsController;
     private final String url = "/api/v1/users/{id}/accounts";
+
+    @BeforeEach
+    void init() {
+        Mockito.doNothing().when(metric).post();
+        Mockito.doNothing().when(metric).get();
+        Mockito.doNothing().when(metric).successPost();
+        Mockito.doNothing().when(metric).successGet();
+    }
 
     @DisplayName("Счет создан успешно")
     @Test

@@ -119,9 +119,6 @@ deactivate F
 
 </details>
 
-## Планы на будущее
-- Добавить возможность перевода
-
 ## Контакты
 Связаться со мной можно через:
 - [GitHub](https://github.com/molchmd): molchmd
