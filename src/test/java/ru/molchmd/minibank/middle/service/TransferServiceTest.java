@@ -30,7 +30,7 @@ public class TransferServiceTest {
         String accountName = "Акционный";
         var backendResponse = new ResponseEntity<String>(HttpStatus.OK);
 
-        Mockito.when(transferApi.transferAmount(createTransferRequest, accountName, accountName)).thenReturn(backendResponse);
+        Mockito.when(transferApi.transferAmount(Mockito.any(CreateTransferRequest.class), Mockito.anyString(), Mockito.anyString())).thenReturn(backendResponse);
 
         Assertions.assertDoesNotThrow(() -> transferService.transfer(createTransferRequest.getFrom(), createTransferRequest.getTo(), createTransferRequest.getAmount()));
     }
@@ -43,7 +43,7 @@ public class TransferServiceTest {
         String jsonBackend = "{\"message\": \"error\",\n\"type\": \"TYPE\",\n\"code\": \"101\",\n\"traceId\": \"some-id\"}";
         var backendResponse = new ResponseEntity<String>(jsonBackend, HttpStatus.BAD_REQUEST);
 
-        Mockito.when(transferApi.transferAmount(createTransferRequest, accountName, accountName)).thenReturn(backendResponse);
+        Mockito.when(transferApi.transferAmount(Mockito.any(CreateTransferRequest.class), Mockito.anyString(), Mockito.anyString())).thenReturn(backendResponse);
 
         Assertions.assertThrows(TransferException.class,
                 () -> transferService.transfer(createTransferRequest.getFrom(), createTransferRequest.getTo(), createTransferRequest.getAmount()));
@@ -56,7 +56,7 @@ public class TransferServiceTest {
         String accountName = "Акционный";
         var backendResponse = new ResponseEntity<String>(HttpStatus.INTERNAL_SERVER_ERROR);
 
-        Mockito.when(transferApi.transferAmount(createTransferRequest, accountName, accountName)).thenReturn(backendResponse);
+        Mockito.when(transferApi.transferAmount(Mockito.any(CreateTransferRequest.class), Mockito.anyString(), Mockito.anyString())).thenReturn(backendResponse);
 
         Assertions.assertThrows(InternalServerException.class,
                 () -> transferService.transfer(createTransferRequest.getFrom(), createTransferRequest.getTo(), createTransferRequest.getAmount()));
