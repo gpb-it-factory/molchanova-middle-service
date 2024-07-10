@@ -24,7 +24,7 @@ public class TransfersController {
     public ResponseEntity<Void> createTransfer(@RequestBody CreateTransferRequest createTransferRequest) {
         log.info("Request -> Received request to create transfer: {}", createTransferRequest);
         metric.post();
-        transferService.transfer(createTransferRequest);
+        transferService.transfer(createTransferRequest.getFrom(), createTransferRequest.getTo(), createTransferRequest.getAmount());
         log.info("Response -> Transfer was successfully completed | status {}", HttpStatus.OK);
         metric.successPost();
         return new ResponseEntity<>(HttpStatus.OK);

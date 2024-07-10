@@ -42,7 +42,7 @@ public class TransfersControllerTest {
     @DisplayName("Успешный перевод средств")
     @Test
     void transferSuccess() throws Exception {
-        Mockito.doNothing().when(transferService).transfer(Mockito.any(CreateTransferRequest.class));
+        Mockito.doNothing().when(transferService).transfer(Mockito.any(String.class), Mockito.any(String.class), Mockito.any(String.class));
         String jsonRequest = "{\"from\": \"tester\",\n\"to\": \"cat\",\n\"amount\": \"99.99\"}";
 
         mockMvc.perform(post(url)
@@ -56,7 +56,7 @@ public class TransfersControllerTest {
     void transferError() throws Exception {
         String jsonRequest = "{\"from\": \"tester\",\n\"to\": \"cat\",\n\"amount\": \"99.99\"}";
         String jsonResponse= "{\"type\": \"TYPE\"}";
-        Mockito.doThrow(new TransferException("tester", "cat", jsonResponse)).when(transferService).transfer(Mockito.any(CreateTransferRequest.class));
+        Mockito.doThrow(new TransferException("tester", "cat", jsonResponse)).when(transferService).transfer(Mockito.any(String.class), Mockito.any(String.class), Mockito.any(String.class));
 
         mockMvc.perform(post(url)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -69,7 +69,7 @@ public class TransfersControllerTest {
     @Test
     void transferServerNotAvailable() throws Exception {
         String jsonRequest = "{\"from\": \"tester\",\n\"to\": \"cat\",\n\"amount\": \"99.99\"}";
-        Mockito.doThrow(ResourceAccessException.class).when(transferService).transfer(Mockito.any(CreateTransferRequest.class));
+        Mockito.doThrow(ResourceAccessException.class).when(transferService).transfer(Mockito.any(String.class), Mockito.any(String.class), Mockito.any(String.class));
 
         mockMvc.perform(post(url)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -81,7 +81,7 @@ public class TransfersControllerTest {
     @Test
     void transferServerError() throws Exception {
         String jsonRequest = "{\"from\": \"tester\",\n\"to\": \"cat\",\n\"amount\": \"99.99\"}";
-        Mockito.doThrow(InternalServerException.class).when(transferService).transfer(Mockito.any(CreateTransferRequest.class));
+        Mockito.doThrow(InternalServerException.class).when(transferService).transfer(Mockito.any(String.class), Mockito.any(String.class), Mockito.any(String.class));
 
         mockMvc.perform(post(url)
                         .contentType(MediaType.APPLICATION_JSON)

@@ -23,12 +23,10 @@ public class TransferService {
         this.generalAccountName = "Акционный";
     }
 
-    public void transfer(CreateTransferRequest createTransferRequest) {
-        String fromUserName = createTransferRequest.getFrom();
-        String toUserName = createTransferRequest.getTo();
+    public void transfer(String fromUserName, String toUserName, String amount) {
 
         ResponseEntity<String> response = transferApi.transferAmount(
-                createTransferRequest, generalAccountName, generalAccountName
+                new CreateTransferRequest(fromUserName, toUserName, amount), generalAccountName, generalAccountName
         );
         if (response.getStatusCode().isSameCodeAs(HttpStatus.BAD_REQUEST)) {
             String jsonResponse = toJsonResponse(response.getBody());

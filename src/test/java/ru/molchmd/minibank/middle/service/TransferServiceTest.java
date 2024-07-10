@@ -32,7 +32,7 @@ public class TransferServiceTest {
 
         Mockito.when(transferApi.transferAmount(createTransferRequest, accountName, accountName)).thenReturn(backendResponse);
 
-        Assertions.assertDoesNotThrow(() -> transferService.transfer(createTransferRequest));
+        Assertions.assertDoesNotThrow(() -> transferService.transfer(createTransferRequest.getFrom(), createTransferRequest.getTo(), createTransferRequest.getAmount()));
     }
 
     @DisplayName("Ошибка перевода")
@@ -46,7 +46,7 @@ public class TransferServiceTest {
         Mockito.when(transferApi.transferAmount(createTransferRequest, accountName, accountName)).thenReturn(backendResponse);
 
         Assertions.assertThrows(TransferException.class,
-                () -> transferService.transfer(createTransferRequest));
+                () -> transferService.transfer(createTransferRequest.getFrom(), createTransferRequest.getTo(), createTransferRequest.getAmount()));
     }
 
     @DisplayName("Ошибка сервера backend")
@@ -59,6 +59,6 @@ public class TransferServiceTest {
         Mockito.when(transferApi.transferAmount(createTransferRequest, accountName, accountName)).thenReturn(backendResponse);
 
         Assertions.assertThrows(InternalServerException.class,
-                () -> transferService.transfer(createTransferRequest));
+                () -> transferService.transfer(createTransferRequest.getFrom(), createTransferRequest.getTo(), createTransferRequest.getAmount()));
     }
 }
