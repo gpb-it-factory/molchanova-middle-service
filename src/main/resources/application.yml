@@ -27,3 +27,13 @@ backend:
     amount:
       max: 100000.00
       min: 0.00
+
+management:
+  endpoints.web.exposure.include: 'prometheus, health'
+  metrics:
+    export:
+      prometheus:
+        enabled: true
+    distribution:
+       percentiles-histogram:
+         "[http.server.requests:]": true
