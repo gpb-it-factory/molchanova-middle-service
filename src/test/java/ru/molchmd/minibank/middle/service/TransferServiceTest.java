@@ -1,12 +1,9 @@
 package ru.molchmd.minibank.middle.service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import ru.molchmd.minibank.middle.client.TransferApi;
 import ru.molchmd.minibank.middle.client.api.TransferRestApi;
 import ru.molchmd.minibank.middle.dto.request.CreateTransferRequest;
@@ -20,45 +17,44 @@ public class TransferServiceTest {
 
     public TransferServiceTest() {
         transferApi = Mockito.mock(TransferRestApi.class);
-        transferService = new TransferService(transferApi, new ObjectMapper());
+        transferService = new TransferService(transferApi);
     }
 
     @DisplayName("Успешный перевод")
     @Test
     void transferSuccess() {
-        CreateTransferRequest createTransferRequest = new CreateTransferRequest("tester", "cat", "99.99");
-        String accountName = "Акционный";
-        var backendResponse = new ResponseEntity<String>(HttpStatus.OK);
+        String fromUserName = "tester";
+        String toUserName = "cat";
+        String amount = "99.99";
 
-        Mockito.when(transferApi.transferAmount(Mockito.any(CreateTransferRequest.class), Mockito.anyString(), Mockito.anyString())).thenReturn(backendResponse);
+        Mockito.when(transferApi.transferAmount(Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.anyString())).thenReturn(1);
 
-        Assertions.assertDoesNotThrow(() -> transferService.transfer(createTransferRequest.getFrom(), createTransferRequest.getTo(), createTransferRequest.getAmount()));
+        Assertions.assertDoesNotThrow(() -> transferService.transfer(fromUserName, toUserName, amount));
     }
 
     @DisplayName("Ошибка перевода")
     @Test
     void transferBadRequest() {
-        CreateTransferRequest createTransferRequest = new CreateTransferRequest("tester", "cat", "99.99");
-        String accountName = "Акционный";
-        String jsonBackend = "{\"message\": \"error\",\n\"type\": \"TYPE\",\n\"code\": \"101\",\n\"traceId\": \"some-id\"}";
-        var backendResponse = new ResponseEntity<String>(jsonBackend, HttpStatus.BAD_REQUEST);
+        String fromUserName = "tester";
+        String toUserName = "cat";
+        String amount = "99.99";
 
-        Mockito.when(transferApi.transferAmount(Mockito.any(CreateTransferRequest.class), Mockito.anyString(), Mockito.anyString())).thenReturn(backendResponse);
+        Mockito.when(transferApi.transferAmount(Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.anyString())).thenThrow(TransferException.class);
 
         Assertions.assertThrows(TransferException.class,
-                () -> transferService.transfer(createTransferRequest.getFrom(), createTransferRequest.getTo(), createTransferRequest.getAmount()));
+                () -> transferService.transfer(fromUserName, toUserName, amount));
     }
 
     @DisplayName("Ошибка сервера backend")
     @Test
     void transferServerError() {
-        CreateTransferRequest createTransferRequest = new CreateTransferRequest("tester", "cat", "99.99");
-        String accountName = "Акционный";
-        var backendResponse = new ResponseEntity<String>(HttpStatus.INTERNAL_SERVER_ERROR);
+        String fromUserName = "tester";
+        String toUserName = "cat";
+        String amount = "99.99";
 
-        Mockito.when(transferApi.transferAmount(Mockito.any(CreateTransferRequest.class), Mockito.anyString(), Mockito.anyString())).thenReturn(backendResponse);
+        Mockito.when(transferApi.transferAmount(Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.anyString())).thenThrow(InternalServerException.class);
 
         Assertions.assertThrows(InternalServerException.class,
-                () -> transferService.transfer(createTransferRequest.getFrom(), createTransferRequest.getTo(), createTransferRequest.getAmount()));
+                () -> transferService.transfer(fromUserName, toUserName, amount));
     }
 }
