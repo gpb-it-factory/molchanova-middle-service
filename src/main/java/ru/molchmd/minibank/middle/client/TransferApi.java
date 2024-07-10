@@ -4,6 +4,6 @@ import org.springframework.http.ResponseEntity;
 import ru.molchmd.minibank.middle.dto.request.CreateTransferRequest;
 
 public interface TransferApi {
-    ResponseEntity<String> transferAmount(CreateTransferRequest createTransferRequest,
+    int transferAmount(String fromUserName, String toUserName, String amount,
                                           String fromAccountName, String toAccountName);
 }

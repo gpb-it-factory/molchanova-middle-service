@@ -1,5 +1,7 @@
 package ru.molchmd.minibank.middle.client.mock;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.http.HttpStatus;
@@ -12,6 +14,9 @@ import ru.molchmd.minibank.middle.client.mock.repository.UsersAccountsRepository
 import ru.molchmd.minibank.middle.client.mock.util.ErrorResponseEntity;
 import ru.molchmd.minibank.middle.client.mock.util.ExtendedStatus;
 import ru.molchmd.minibank.middle.dto.request.CreateTransferRequest;
+import ru.molchmd.minibank.middle.dto.response.Error;
+import ru.molchmd.minibank.middle.exception.entity.InternalServerException;
+import ru.molchmd.minibank.middle.exception.entity.TransferException;
 
 import java.math.BigDecimal;
 import java.util.Optional;
@@ -25,21 +30,38 @@ public class TransferMockApi implements TransferApi {
     private final AccountsAmountRepository accountsAmountRepository;
     private final BigDecimal maxTransferAmount;
     private final BigDecimal minTransferAmount;
+    private final ObjectMapper mapper;
 
     public TransferMockApi(TelegramUserNameUuidRepository telegramUserNameUuidRepository,
                            UsersAccountsRepository usersAccountsRepository,
                            AccountsAmountRepository accountsAmountRepository,
                            @Value("${backend.transfers.amount.max}") String maxTransferAmount,
-                           @Value("${backend.transfers.amount.min}") String minTransferAmount) {
+                           @Value("${backend.transfers.amount.min}") String minTransferAmount,
+                           ObjectMapper mapper) {
         this.telegramUserNameUuidRepository = telegramUserNameUuidRepository;
         this.usersAccountsRepository = usersAccountsRepository;
         this.accountsAmountRepository = accountsAmountRepository;
         this.maxTransferAmount = new BigDecimal(maxTransferAmount);
         this.minTransferAmount = new BigDecimal(minTransferAmount);
+        this.mapper = mapper;
     }
 
     @Override
-    public ResponseEntity<String> transferAmount(CreateTransferRequest createTransferRequest,
+    public int transferAmount(String fromUserName, String toUserName, String amount, String fromAccountName, String toAccountName) {
+        ResponseEntity<String> response = transferAmountMockBackend(
+                new CreateTransferRequest(fromUserName, toUserName, amount), fromAccountName, toAccountName
+        );
+        if (response.getStatusCode().isSameCodeAs(HttpStatus.BAD_REQUEST)) {
+            String jsonResponse = toJsonResponse(response.getBody());
+            throw new TransferException(fromUserName, toUserName, jsonResponse);
+        }
+        if (response.getStatusCode().is5xxServerError()) {
+            throw new InternalServerException();
+        }
+        return ok();
+    }
+
+    private ResponseEntity<String> transferAmountMockBackend(CreateTransferRequest createTransferRequest,
                                                  String fromAccountName, String toAccountName) {
         String fromUserName = createTransferRequest.getFrom();
         String toUserName = createTransferRequest.getTo();
@@ -128,5 +150,18 @@ public class TransferMockApi implements TransferApi {
         accountsAmountRepository.setAmount(uuidFromAccount, currentFromUserAmount.subtract(transferAmount));
         BigDecimal currentToUserAmount = accountsAmountRepository.getAmount(uuidToAccount);
         accountsAmountRepository.setAmount(uuidToAccount, currentToUserAmount.add(transferAmount));
+    }
+
+    private String toJsonResponse(String body) {
+        try {
+            Error error = mapper.readValue(body, Error.class);
+            return mapper.writeValueAsString(error);
+        } catch (JsonProcessingException exception) {
+            throw new InternalServerException();
+        }
+    }
+
+    private int ok() {
+        return 1;
     }
 }
