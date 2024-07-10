@@ -9,7 +9,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 import ru.molchmd.minibank.middle.client.TransferApi;
-import ru.molchmd.minibank.middle.dto.request.CreateAccountRequest;
 import ru.molchmd.minibank.middle.dto.request.CreateTransferRequest;
 import ru.molchmd.minibank.middle.dto.response.Error;
 import ru.molchmd.minibank.middle.exception.entity.InternalServerException;
