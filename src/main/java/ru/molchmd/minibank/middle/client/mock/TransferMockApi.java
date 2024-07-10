@@ -14,6 +14,7 @@ import ru.molchmd.minibank.middle.client.mock.util.ExtendedStatus;
 import ru.molchmd.minibank.middle.dto.request.CreateTransferRequest;
 
 import java.math.BigDecimal;
+import java.util.Optional;
 import java.util.UUID;
 
 @Component
@@ -48,50 +49,78 @@ public class TransferMockApi implements TransferApi {
             return ErrorResponseEntity.badRequest(ExtendedStatus.SENDER_USER_NOT_EXIST);
         }
         UUID uuidFromUser = telegramUserNameUuidRepository.getUserUUID(fromUserName);
-        if (!usersAccountsRepository.getAccountsRepo(uuidFromUser).isAccountExist(fromAccountName)) {
-            return ErrorResponseEntity.badRequest(ExtendedStatus.SENDER_USER_ACCOUNT_NOT_EXIST);
+
+        Optional<ExtendedStatus> result = validateSenderUser(uuidFromUser, fromUserName, fromAccountName, toUserName);
+        if (result.isPresent()) {
+            return ErrorResponseEntity.badRequest(result.get());
         }
-        if (toUserName.equals(fromUserName)) {
-            return ErrorResponseEntity.badRequest(ExtendedStatus.SENDER_RECIPIENT_SAME);
-        }
+
+        UUID uuidFromAccount = usersAccountsRepository.getAccountsRepo(uuidFromUser).getAccountUUID(fromAccountName);
 
         BigDecimal transferAmount;
         try {
             transferAmount = new BigDecimal(amount).stripTrailingZeros();
-            if (transferAmount.scale() > 2) {
-                return ErrorResponseEntity.badRequest(ExtendedStatus.AMOUNT_MORE_TWO_CHAR);
-            }
         }
         catch (NumberFormatException exception) {
             return ErrorResponseEntity.badRequest(ExtendedStatus.AMOUNT_CONVERT_NUMBER);
         }
 
-        if (transferAmount.compareTo(BigDecimal.ZERO) <= 0) {
-            return ErrorResponseEntity.badRequest(ExtendedStatus.AMOUNT_LESS_ZERO);
-        }
-        if (transferAmount.compareTo(minTransferAmount) < 0) {
-            return ErrorResponseEntity.badRequest(ExtendedStatus.AMOUNT_LESS_ALLOWED_MIN);
-        }
-        if (transferAmount.compareTo(maxTransferAmount) > 0) {
-            return ErrorResponseEntity.badRequest(ExtendedStatus.AMOUNT_HIGHER_ALLOWED_MAX);
-        }
-
-        UUID uuidFromAccount = usersAccountsRepository.getAccountsRepo(uuidFromUser).getAccountUUID(fromAccountName);
-        if (accountsAmountRepository.getAmount(uuidFromAccount).compareTo(transferAmount) < 0) {
-            return ErrorResponseEntity.badRequest(ExtendedStatus.AMOUNT_NOT_ENOUGH);
+        result = validateAmount(transferAmount, amount, uuidFromAccount);
+        if (result.isPresent()) {
+            return ErrorResponseEntity.badRequest(result.get());
         }
 
         if (!telegramUserNameUuidRepository.isUserExist(toUserName)) {
             return ErrorResponseEntity.badRequest(ExtendedStatus.RECIPIENT_USER_NOT_EXIST);
         }
         UUID uuidToUser = telegramUserNameUuidRepository.getUserUUID(toUserName);
-        if (!usersAccountsRepository.getAccountsRepo(uuidToUser).isAccountExist(toAccountName)) {
-            return ErrorResponseEntity.badRequest(ExtendedStatus.RECIPIENT_USER_ACCOUNT_NOT_EXIST);
+
+        result = validateRecipientUser(uuidToUser, toUserName, toAccountName);
+        if (result.isPresent()) {
+            return ErrorResponseEntity.badRequest(result.get());
         }
+
         UUID uuidToAccount = usersAccountsRepository.getAccountsRepo(uuidToUser).getAccountUUID(toAccountName);
 
         createTransfer(uuidFromAccount, uuidToAccount, transferAmount);
         return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    private Optional<ExtendedStatus> validateSenderUser(UUID uuidFromUser, String fromUserName, String fromAccountName, String toUserName) {
+        if (!usersAccountsRepository.getAccountsRepo(uuidFromUser).isAccountExist(fromAccountName)) {
+            return Optional.of(ExtendedStatus.SENDER_USER_ACCOUNT_NOT_EXIST);
+        }
+        if (toUserName.equals(fromUserName)) {
+            return Optional.of(ExtendedStatus.SENDER_RECIPIENT_SAME);
+        }
+        return Optional.empty();
+    }
+
+    private Optional<ExtendedStatus> validateRecipientUser(UUID uuidToUser, String toUserName, String toAccountName) {
+        if (!usersAccountsRepository.getAccountsRepo(uuidToUser).isAccountExist(toAccountName)) {
+            return Optional.of(ExtendedStatus.RECIPIENT_USER_ACCOUNT_NOT_EXIST);
+        }
+        return Optional.empty();
+    }
+
+    private Optional<ExtendedStatus> validateAmount(BigDecimal transferAmount, String amount, UUID uuidFromAccount) {
+        if (transferAmount.scale() > 2) {
+            return Optional.of(ExtendedStatus.AMOUNT_MORE_TWO_CHAR);
+        }
+        if (transferAmount.compareTo(BigDecimal.ZERO) <= 0) {
+            return Optional.of(ExtendedStatus.AMOUNT_LESS_ZERO);
+        }
+        if (transferAmount.compareTo(minTransferAmount) < 0) {
+            return Optional.of(ExtendedStatus.AMOUNT_LESS_ALLOWED_MIN);
+        }
+        if (transferAmount.compareTo(maxTransferAmount) > 0) {
+            return Optional.of(ExtendedStatus.AMOUNT_HIGHER_ALLOWED_MAX);
+        }
+
+        if (accountsAmountRepository.getAmount(uuidFromAccount).compareTo(transferAmount) < 0) {
+            return Optional.of(ExtendedStatus.AMOUNT_NOT_ENOUGH);
+        }
+        return Optional.empty();
     }
 
     private void createTransfer(UUID uuidFromAccount, UUID uuidToAccount, BigDecimal transferAmount) {
